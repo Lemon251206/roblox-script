@@ -134,6 +134,28 @@ function getMoney()
     return player._stats.resource.Value;
 end;
 
+function getGems() 
+    return player['_stats'].gem_amount.Value;
+end;
+
+function getGemsReceived()
+    return (tonumber(getGems()) - tonumber(getgenv().Gems));
+end;
+
+function Format(Int)
+	return string.format("%02i", Int)
+end;
+
+function convertToHMS(seconds)
+	local Minutes = (seconds - seconds%60)/60
+	seconds = seconds - Minutes*60
+	return Format(Minutes)..":"..Format(seconds)
+end;
+
+function getTotalTime()
+    return convertToHMS(os.time() - gengenv().Timing);
+end;
+
 function isFinished()
     return workspace:WaitForChild("_DATA"):WaitForChild("GameFinished").Value;
 end;
@@ -160,10 +182,48 @@ function message(message)
     print('['..time()..']: '..message)
 end;
 
+function getMessage(array)
+    local message = "";
+    for i = 1,#array,1 do
+        message = message..'\n'..array[i];
+    end
+    return message;
+end;
+
+function getEmbeds()
+    embeded = {
+    	--["content"] = "@everyone", -- pings user on discord
+    	["embeds"] = {{
+    		["title"] = "Anime Adventures [lemon]",
+    		["description"] = getMessage({
+                '**Displayname:** ||'..player.Name..'||',
+                '**Gems received:** '..getGemsReceived(),
+                '**Gems:** '..getGems(),
+                '**Waves:**'..getWaves(),
+                '',
+                '**Total time:**'..getTotalTime();
+            });
+    		["color"] = 14400313;
+    	}}
+    }
+    return embeded;
+end
+
+function webhook(url)
+	syn.request({
+		Url = url,
+		Method = "POST",
+		Headers = { ["Content-Type"] =  "application/json" },
+		Body = game:GetService('HttpService'):JSONEncode(getEmbeds());
+	})
+end;
+
 function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
-            wait(5);
+            wait(1);
+            webhook('https://discord.com/api/webhooks/994515134380781668/dH6PDbmHltUeVnKJUVxoRJ2S2n0imhSMhO0ON1RGKtNrzycqdcRzo2OeeLKHuPRaoD79');
+            wait(4);
             back_to_lobby();
             break;
         end
@@ -290,6 +350,8 @@ spawn(function()
     if placeId == place["lobby"] then
         coroutine.resume(join);
     elseif placeId == place["game"] then
+        getgenv().Gems = getGems();
+        getgenv().Timing = os.time();
         coroutine.resume(game);
     end
     anti_afk();
