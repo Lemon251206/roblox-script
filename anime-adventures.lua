@@ -261,8 +261,8 @@ function load_function()
     wave_function['38'] = (function()
         spawn_unit('blackbeard', 1);
         spawn_unit('blackbeard', 2);
-        upgrades_unit('blackbeard', 7);
-        upgrades_unit('blackbeard', 7);
+        upgrades_unit('blackbeard', 1, 7);
+        upgrades_unit('blackbeard', 2, 7);
     end);
 end
 
