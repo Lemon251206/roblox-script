@@ -135,7 +135,7 @@ function getMoney()
 end;
 
 function getGems() 
-    return player['_stats'].gem_amount.Value;
+    return player:WaitForChild("_stats").gem_amount.Value;
 end;
 
 function getGemsReceived()
@@ -224,7 +224,7 @@ function wait_wave()
             wait(5);
             webhook('https://discord.com/api/webhooks/994515134380781668/dH6PDbmHltUeVnKJUVxoRJ2S2n0imhSMhO0ON1RGKtNrzycqdcRzo2OeeLKHuPRaoD79');
             wait(1);
-            back_to_lobby();
+            --back_to_lobby();
             break;
         end
         if getWaves() == (_G.WAVE + 1) then
