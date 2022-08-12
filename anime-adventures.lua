@@ -241,22 +241,22 @@ function load_function()
         upgrades_unit('noro', 5, 6);
     end);
     wave_function['25'] = (function()
-        spawn_unit('black_goku', 1);
-        spawn_unit('black_goku', 2);
-        upgrades_unit('black_goku', 1, 7);
-        upgrades_unit('black_goku', 2, 7);
+        spawn_unit('goku_black', 1);
+        spawn_unit('goku_black', 2);
+        upgrades_unit('goku_black', 1, 7);
+        upgrades_unit('goku_black', 2, 7);
     end);
     wave_function['26'] = (function()
-        spawn_unit('black_goku', 3);
-        upgrades_unit('black_goku', 3, 7);
+        spawn_unit('goku_black', 3);
+        upgrades_unit('goku_black', 3, 7);
     end);
     wave_function['28'] = (function()
-        spawn_unit('black_goku', 4);
-        upgrades_unit('black_goku', 4, 7);
+        spawn_unit('goku_black', 4);
+        upgrades_unit('goku_black', 4, 7);
     end);
     wave_function['32'] = (function()
-        spawn_unit('black_goku', 5);
-        upgrades_unit('black_goku', 5, 7);
+        spawn_unit('goku_black', 5);
+        upgrades_unit('goku_black', 5, 7);
     end);
     wave_function['38'] = (function()
         spawn_unit('blackbeard', 1);
