@@ -139,7 +139,7 @@ function getGems()
 end;
 
 function getGemsReceived()
-    return (tonumber(getGems()) - tonumber(getgenv().Gems));
+    return (tonumber(getGems()) - tonumber(_G.Gems));
 end;
 
 function Format(Int)
@@ -153,7 +153,7 @@ function convertToHMS(seconds)
 end;
 
 function getTotalTime()
-    return convertToHMS(os.time() - gengenv().Timing);
+    return convertToHMS(os.time() - _G.Timing);
 end;
 
 function isFinished()
@@ -350,8 +350,8 @@ spawn(function()
     if placeId == place["lobby"] then
         coroutine.resume(join);
     elseif placeId == place["game"] then
-        getgenv().Gems = getGems();
-        getgenv().Timing = os.time();
+        _G.Gems = getGems();
+        _G.Timing = os.time();
         coroutine.resume(game);
     end
     anti_afk();
