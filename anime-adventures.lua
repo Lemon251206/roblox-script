@@ -221,10 +221,10 @@ end;
 function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
-            wait(5);
+            wait(10);
             webhook('https://discord.com/api/webhooks/994515134380781668/dH6PDbmHltUeVnKJUVxoRJ2S2n0imhSMhO0ON1RGKtNrzycqdcRzo2OeeLKHuPRaoD79');
-            wait(1);
-            --back_to_lobby();
+            wait(2.5);
+            back_to_lobby();
             break;
         end
         if getWaves() == (_G.WAVE + 1) then
