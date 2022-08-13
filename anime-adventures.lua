@@ -310,7 +310,7 @@ function load_function()
         upgrades_unit('noro', 5, 6);
     end);
     wave_function['20'] = (function()
-        for k, v in pairs (unit_models) do
+        for k, v in pairs (units_model) do
             sell_units(k, v);
         end;
     end);
