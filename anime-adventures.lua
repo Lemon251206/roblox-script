@@ -106,6 +106,14 @@ function spawn_unit(unit_name, number) -- lobby_id is String, location is CFrame
     wait(0.075);
 end;
 
+function sell_units(unit_name, array)
+    for i = 1, #array, 1 do
+	client_to_server.sell_unit_ingame:InvokeServer(units_model[unit_name][i]);
+	message('sell unit [' .. unit_name .. ']');
+	wait(0.075);
+    end;
+end;
+
 function upgrade_unit(unit_name, array) -- unit_model is Model
     client_to_server.upgrade_unit_ingame:InvokeServer(units_model[unit_name][array]);
     message('upgrade unit [' .. unit_name .. ']');
@@ -300,31 +308,12 @@ function load_function()
         spawn_unit('noro', 5);
         upgrades_unit('noro', 5, 6);
     end);
-    wave_function['25'] = (function()
-        spawn_unit('goku_black', 1);
-        spawn_unit('goku_black', 2);
-        upgrades_unit('goku_black', 1, 7);
-        upgrades_unit('goku_black', 2, 7);
+    wave_function['20'] = (function()
+	for k, v in pairs units_model do
+	    sell_units(k, v);		
+	end;
     end);
-    wave_function['26'] = (function()
-        spawn_unit('goku_black', 3);
-        upgrades_unit('goku_black', 3, 7);
-    end);
-    wave_function['28'] = (function()
-        spawn_unit('goku_black', 4);
-        upgrades_unit('goku_black', 4, 7);
-    end);
-    wave_function['32'] = (function()
-        spawn_unit('goku_black', 5);
-        upgrades_unit('goku_black', 5, 7);
-    end);
-    wave_function['38'] = (function()
-        spawn_unit('blackbeard', 1);
-        spawn_unit('blackbeard', 2);
-        upgrades_unit('blackbeard', 1, 7);
-        upgrades_unit('blackbeard', 2, 7);
-    end);
-end
+end;
 
 local join = coroutine.create(function()
     message('lobby activated');
