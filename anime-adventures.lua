@@ -108,11 +108,9 @@ function spawn_unit(unit_name, number) -- lobby_id is String, location is CFrame
     wait(0.075);
 end;
 
-function sell_units(unit_name, array)
-    for i = 1, #array, 1 do
-        client_to_server.sell_unit_ingame:InvokeServer(unit_models[unit_name][i]);
-        message('sell units' .. unit_name .. ']');
-    end;
+function sell_unit(unit_name, count)
+    client_to_server.sell_unit_ingame:InvokeServer(unit_models[unit_name][count]);
+    message('sell units' .. unit_name .. ']');
 end;
 
 function upgrade_unit(unit_name, array) -- unit_model is Model
@@ -310,9 +308,14 @@ function load_function()
         upgrades_unit('noro', 5, 6);
     end);
     wave_function['20'] = (function()
-        for k, v in pairs (units_model) do
-            sell_units(k, v);
-        end;
+        sell_unit('dio', 1);
+        sell_unit('dio', 2);
+        sell_unit('dio', 3);
+        sell_unit('noro', 1);
+        sell_unit('noro', 2);
+        sell_unit('noro', 3);
+        sell_unit('noro', 4);
+        sell_unit('noro', 5);
     end);
 end
 
