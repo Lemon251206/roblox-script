@@ -105,9 +105,6 @@ function join_lobby(id) -- id is Integer
     client_to_server.request_join_lobby:InvokeServer(lobbys[id]);
     if (player:WaitForChild('AlreadyInLobby').Value) then
         message('join lobby [' .. lobbys[id] .. ']');
-    else
-	wait(10);
-	return join_lobby(id);
     end;
     return lobbys[id];
 end;
