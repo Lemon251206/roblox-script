@@ -105,6 +105,9 @@ function join_lobby(id) -- id is Integer
     client_to_server.request_join_lobby:InvokeServer(lobbys[id]);
     if (player:WaitForChild('AlreadyInLobby').Value) then
         message('join lobby [' .. lobbys[id] .. ']');
+    else
+	wait(10);
+	return join_lobby(id);
     end;
     return lobbys[id];
 end;
@@ -331,7 +334,7 @@ end
 local join = coroutine.create(function()
     message('lobby activated');
     wait(30);
-    local lobby = join_lobbys_random();
+    local lobby = join_lobby_random();
     wait(1);
     lock_level(lobby, getMaps(6, 'infinite'), 'Hard');
     wait(0.1);
