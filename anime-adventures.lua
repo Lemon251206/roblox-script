@@ -330,13 +330,12 @@ end
 
 local join = coroutine.create(function()
     message('lobby activated');
-    wait(15);
-    message('character loaded');
-    join_lobby(13);
+    wait(30);
+    local lobby = join_lobbys_random();
     wait(1);
-    lock_level(lobbys[13], getMaps(6, 'infinite'), 'Hard');
+    lock_level(lobby, getMaps(6, 'infinite'), 'Hard');
     wait(0.1);
-    start_game(lobbys[13]);
+    start_game(lobby);
 end)
 
 local game = coroutine.create(function()
