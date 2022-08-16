@@ -8,6 +8,36 @@ local placeId = tonumber(game.PlaceId);
 --LocalWorkspace
 local units = workspace:WaitForChild("_UNITS");
 
+local lobbys = {
+    '_lobbytemplategreen1',
+    '_lobbytemplategreen2',
+    '_lobbytemplategreen3',
+    '_lobbytemplategreen4',
+    '_lobbytemplategreen5',
+    '_lobbytemplategreen6',
+    '_lobbytemplategreen7',
+    '_lobbytemplategreen8',
+    '_lobbytemplategreen9',
+    '_lobbytemplategreen10',
+    '_lobbytemplategreen11',
+    '_lobbytemplategreen12',
+    '_lobbytemplategreen13';
+};
+
+local Maps = {
+    'namek',
+    'aot',
+    'demonslayer',
+    'naruto',
+    'marineford',
+    'tokyoghoul';
+}
+
+local MapTypes = {
+    ['infinite'] = '_infinite',
+    ['story'] = '_level_';
+}
+
 --LocalPlayer
 local player = game:GetService("Players").LocalPlayer;
 
@@ -29,65 +59,74 @@ local units_uuid = {
     ["goku_black"] = "{9776ad79-29c7-4174-a0f0-e6109d19d06f}",
     ["todoroki"] = "{459570dd-e139-4ecd-a6bf-8dcbc853ec1e}",
     ["noro"] = "{3b080042-cc8c-4e46-92b7-817308429618}",
-    ['blackbeard'] = '{e48173e6-8e76-4c64-bd25-da6e95d9f940}';
+    ['blackbeard'] = '{e48173e6-8e76-4c64-bd25-da6e95d9f940}',
+    ['erwin'] = '{e163720c-626c-4160-8018-9cf4843d8579}';
 }
 
 local units_location = {
-    ["speedwagon"] = {
-        {-2916.28125, 91.8062057, -718.249084},
-        {-2918.28125, 91.8062057, -718.249084},
-        {-2920.28125, 91.8062057, -718.249084};
-    },
+    ["speedwagon"] = {},
     ["dio"] = {
-        {-2958.14355, 91.8062057, -703.298401},
-        {-2955.81665, 91.8062057, -720.750732},
-        {-2943.29541, 91.8062057, -703.704773};
+        {-3000.06616, 58.5851364, -79.3267517},
+        {-3000.06616, 58.5851364, -77.3267517},
+        {-2998.06616, 58.5851364, -79.3267517};
     },
     ['jotaro'] = {},
-    ["goku_black"] = {
-        {-2947.66504, 94.4185944, -716.393005},
-        {-2949.66504, 94.4185944, -716.393005},
-        {-2951.66504, 94.4185944, -716.393005},
-        {-2948.66504, 94.4185944, -718.393005},
-        {-2950.66504, 94.4185944, -718.393005};
-    },
-    ["noro"] = {
-        {-2955.81665, 91.8062057, -718.750732},
-        {-2955.81665, 91.8062057, -722.750732},
-        {-2957.81665, 91.8062057, -719.750732},
-        {-2957.81665, 91.8062057, -721.750732},
-        {-2959.81665, 91.8062057, -720.750732};
-    },
-    ['blackbeard'] = {
-        {-2958.14355, 91.8062057, -705.298401},
-        {-2943.29541, 91.8062057, -705.704773}
+    ["goku_black"] = {},
+    ["noro"] = {},
+    ['blackbeard'] = {},
+    ['erwin'] = {
+        {-2997.41821, 58.5851364, -83.2992935},
+        {-2995.41821, 58.5851364, -83.2992935};
     }
 }
 
-local units_model = {
-    ["speedwagon"] = {},
-    ['dio'] = {};
-    ["jotaro"] = {},
-    ["goku_black"] = {},
-    ["mihawk"] = {},
-    ["noro"] = {},
-    ['blackbeard'] = {};
-}
+local unit_models = {
+    ['dio'] = {},
+    ['erwin'] = {};
+};
 
 local wave_function = {};
 
-function join_lobby(lobby_id) -- lobby_id is String
-    client_to_server.request_join_lobby:InvokeServer(lobby_id);
-    message('join lobby [' .. lobby_id .. ']');
+function getMaps(id, types, level)
+    if (types == 'infinite') then
+        return tostring(Maps[id]..MapTypes[types]);
+    end;
+    if (level == nil) then 
+        level = 1;
+    elseif (level < 1) then
+        level = 1;
+    elseif (level > 6) then
+        level = 6;
+    end;
+    return tostring(Maps[id]..MapTypes[types]..level);
 end;
 
-function leave_lobby(lobby_id) -- lobby_id is String
-    client_to_server.request_leave_lobby:InvokeServer(lobby_id);
-    message('leave lobby [' .. lobby_id .. ']');
+function join_lobby(id) -- id is Integer
+    client_to_server.request_join_lobby:InvokeServer(lobbys[id]);
+    if (player:WaitForChild('AlreadyInLobby').Value) then
+        message('join lobby [' .. lobbys[id] .. ']');
+    end;
+    return lobbys[id];
+end;
+
+function join_lobby_random()
+    local id = math.random(0, #lobbys);
+    join_lobby(id);
+    if not isInLobby() then
+        return join_lobby_random();
+    end;
+    return lobbys[id];
+end;
+
+function leave_lobby(id) -- lobby_id is String
+    client_to_server.request_leave_lobby:InvokeServer(lobbys[id]);
+    if not (isInLobby()) then
+        message('leave lobby [' .. lobbys[id] .. ']');
+    end;
 end;
 
 function lock_level(lobby_id, map_id, difficult) -- lobby_id, map_id, difficult is String
-    client_to_server.request_lock_level:InvokeServer(lobby_id, map_id, false, difficult);
+    client_to_server.request_lock_level:InvokeServer(lobby_id, map_id, true, difficult);
     message('select map [' .. map_id .. ']');
 end;
 
@@ -110,21 +149,25 @@ end;
 
 function sell_units(unit_name, array)
     for i = 1, #array, 1 do
-        client_to_server.sell_unit_ingame:InvokeServer(units_model[unit_name][i]);
-        message('sell units' .. unit_name .. ']');
+        client_to_server.sell_unit_ingame:InvokeServer(unit_models[unit_name][i]);
+        message('sell units [' .. unit_name .. ']');
     end;
 end;
 
 function upgrade_unit(unit_name, array) -- unit_model is Model
-    client_to_server.upgrade_unit_ingame:InvokeServer(units_model[unit_name][array]);
+    client_to_server.upgrade_unit_ingame:InvokeServer(unit_models[unit_name][array]);
     message('upgrade unit [' .. unit_name .. ']');
     wait(0.075);
 end;
 
-function upgrades_unit(unit_name, array, count) 
+function upgrades_unit(unit_name, array, count)
     for i = 1, count, 1 do
         upgrade_unit(unit_name, array);
     end
+end;
+
+function isInLobby()
+    return player:WaitForChild('AlreadyInLobby').Value;
 end;
 
 function getLocation(x, y, z)
@@ -247,70 +290,39 @@ function wait_wave()
 end;
 
 function load_function() 
-    wave_function['1'] = (function()
-        spawn_unit("speedwagon", 1);
-    end);
     wave_function['2'] = (function()
-        spawn_unit("dio", 1);
-        spawn_unit("speedwagon", 2);
-        spawn_unit("speedwagon", 3);
+        spawn_unit('dio', 1);
+        spawn_unit('dio', 2);
+        upgrades_unit('dio', 1, 2);
     end);
     wave_function['3'] = (function()
-        upgrade_unit("speedwagon", 1);
-        upgrade_unit("speedwagon", 2);
-        upgrade_unit("speedwagon", 3);
+        spawn_unit('dio', 3);
+        upgrade_unit('dio', 1);
+        upgrades_unit('dio', 2, 2);
     end);
     wave_function['4'] = (function()
-        upgrade_unit("dio", 1);
-        upgrade_unit("speedwagon", 1);
-        upgrade_unit("speedwagon", 2);
+        upgrade_unit('dio', 2);
+        upgrades_unit('dio', 3, 2);
     end);
     wave_function['5'] = (function()
-        upgrade_unit("speedwagon", 3);
-        upgrade_unit("speedwagon", 1);
+        upgrade_unit('dio', 1);
+        upgrade_unit('dio', 3);
     end);
     wave_function['6'] = (function()
-        upgrade_unit("dio", 1);
-        upgrade_unit("speedwagon", 2);
-        upgrade_unit("speedwagon", 3);
+        upgrade_unit('dio', 1);
     end);
     wave_function['7'] = (function()
-        upgrade_unit('speedwagon', 1);
-        upgrade_unit('speedwagon', 2);
-        upgrade_unit('speedwagon', 3);
+        upgrade_unit('dio', 1);
     end);
     wave_function['8'] = (function()
-        spawn_unit("dio", 2);
-        upgrade_unit('dio', 1);
-        upgrades_unit('dio', 2, 3);
+        spawn_unit('erwin', 1);
+        upgrades_unit('erwin', 1, 2);
+    end);
+    wave_function['9'] = (function()
+        upgrades_unit('erwin', 1, 2);
     end);
     wave_function['10'] = (function()
-        spawn_unit('noro', 1);
-        upgrades_unit('noro', 1, 6);
-    end);
-    wave_function['12'] = (function()
-        spawn_unit('noro', 2);
-        upgrades_unit('noro', 2, 6);
-    end);
-    wave_function['13'] = (function()
-        spawn_unit('noro', 3);
-        upgrades_unit('noro', 3, 6);
-    end);
-    wave_function['15'] = (function()
-        spawn_unit('noro', 4);
-        upgrades_unit('noro', 4, 6);
-    end);
-    wave_function['16'] = (function()
-        upgrades_unit('dio', 2, 3);
-    end);
-    wave_function['18'] = (function()
-        spawn_unit('dio', 3);
-        upgrades_unit('dio', 3, 3)
-        spawn_unit('noro', 5);
-        upgrades_unit('noro', 5, 6);
-    end);
-    wave_function['20'] = (function()
-        for k, v in pairs (units_model) do
+        for k, v in pairs (unit_models) do
             sell_units(k, v);
         end;
     end);
@@ -318,13 +330,13 @@ end
 
 local join = coroutine.create(function()
     message('lobby activated');
-    wait(25);
-    message('character loaded')
-    join_lobby("_lobbytemplategreen13");
+    wait(5);
+    message('character loaded');
+    local lobby = join_lobby_random();
     wait(1);
-    lock_level("_lobbytemplategreen13", "namek_infinite", "Hard");
+    lock_level(lobby, getMaps(6, 'infinite'), 'Hard');
     wait(0.1);
-    start_game("_lobbytemplategreen13");
+    start_game(lobby);
 end)
 
 local game = coroutine.create(function()
@@ -348,12 +360,19 @@ spawn(function()
 end)
 
 units.ChildAdded:Connect(function(unit)
-    for k, v in pairs (units_model) do
-        if unit.Name == k then
-            table.insert(units_model[k], unit);
+    local owner = tostring(unit:WaitForChild('_stats').player.Value);
+    local name = tostring(unit.Name);
+    if (unit.Name ~= 'aot_generic') then
+        if (player.Name == owner) then
+            if (unit_models[name] ~= nil) then
+                table.insert(unit_models[name], unit);
+            else
+                unit_models[name] = {};
+                table.insert(unit_models[name], unit);
+            end;
         end;
     end;
-end)
+end);
 
 player.OnTeleport:Connect(function(state)
     if state == Enum.TeleportState.InProgress then
