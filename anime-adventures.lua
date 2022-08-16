@@ -330,7 +330,7 @@ end
 
 local join = coroutine.create(function()
     message('lobby activated');
-    wait(5);
+    wait(15);
     message('character loaded');
     join_lobby(13);
     wait(1);
