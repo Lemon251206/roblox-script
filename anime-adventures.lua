@@ -332,11 +332,11 @@ local join = coroutine.create(function()
     message('lobby activated');
     wait(5);
     message('character loaded');
-    local lobby = join_lobby_random();
+    join_lobby(13);
     wait(1);
-    lock_level(lobby, getMaps(6, 'infinite'), 'Hard');
+    lock_level(lobbys[13], getMaps(6, 'infinite'), 'Hard');
     wait(0.1);
-    start_game(lobby);
+    start_game(lobbys[13]);
 end)
 
 local game = coroutine.create(function()
