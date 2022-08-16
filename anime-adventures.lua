@@ -322,6 +322,22 @@ function load_function()
         upgrades_unit('erwin', 1, 2);
     end);
     wave_function['10'] = (function()
+        upgrade_unit('erwin', 1);
+    end);
+    wave_function['11'] = (function()
+        spawn_unit('erwin', 2);
+        upgrades_unit('erwin', 2, 3);
+    end);
+    wave_function['12'] = (function()
+        upgrade_unit('erwin', 2);
+    end);
+    wave_function['13'] = (function()
+        upgrade_unit('erwin', 1);
+    end);
+    wave_function['14'] = (function()
+        upgrade_unit('erwin', 2);
+    end);
+    wave_function['15'] = (function()
         for k, v in pairs (unit_models) do
             sell_units(k, v);
         end;
