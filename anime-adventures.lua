@@ -341,7 +341,7 @@ end
 
 local join = coroutine.create(function()
     message('lobby activated');
-    wait(5);
+    wait(30);
     local lobby = join_lobby_random();
     wait(1);
     lock_level(lobby, getMaps(1, 'infinite'), 'Hard');
