@@ -66,18 +66,21 @@ local units_uuid = {
 local units_location = {
     ["speedwagon"] = {},
     ["dio"] = {
-        {-3000.06616, 58.5851364, -79.3267517},
-        {-3000.06616, 58.5851364, -77.3267517},
-        {-2998.06616, 58.5851364, -79.3267517};
+        {-2958.14355, 91.8062057, -703.298401},
+        {-2955.81665, 91.8062057, -720.750732},
+        {-2943.29541, 91.8062057, -703.704773};
     },
     ['jotaro'] = {},
     ["goku_black"] = {},
-    ["noro"] = {},
+    ["noro"] = {
+        {-2955.81665, 91.8062057, -718.750732},
+        {-2955.81665, 91.8062057, -722.750732},
+        {-2957.81665, 91.8062057, -719.750732},
+        {-2957.81665, 91.8062057, -721.750732},
+        {-2959.81665, 91.8062057, -720.750732};
+    },
     ['blackbeard'] = {},
-    ['erwin'] = {
-        {-2997.41821, 58.5851364, -83.2992935},
-        {-2995.41821, 58.5851364, -83.2992935};
-    }
+    ['erwin'] = {};
 }
 
 local unit_models = {
@@ -291,53 +294,45 @@ end;
 
 function load_function() 
     wave_function['2'] = (function()
-        spawn_unit('dio', 1);
-        spawn_unit('dio', 2);
-        upgrades_unit('dio', 1, 2);
-    end);
-    wave_function['3'] = (function()
-        spawn_unit('dio', 3);
-        upgrade_unit('dio', 1);
-        upgrades_unit('dio', 2, 2);
+        spawn_unit("dio", 1);
     end);
     wave_function['4'] = (function()
-        upgrade_unit('dio', 2);
-        upgrades_unit('dio', 3, 2);
-    end);
-    wave_function['5'] = (function()
-        upgrade_unit('dio', 1);
-        upgrade_unit('dio', 3);
+        upgrade_unit("dio", 1);
     end);
     wave_function['6'] = (function()
-        upgrade_unit('dio', 1);
-    end);
-    wave_function['7'] = (function()
-        upgrade_unit('dio', 1);
+        upgrade_unit("dio", 1);
     end);
     wave_function['8'] = (function()
-        spawn_unit('erwin', 1);
-        upgrades_unit('erwin', 1, 2);
-    end);
-    wave_function['9'] = (function()
-        upgrades_unit('erwin', 1, 2);
+        spawn_unit("dio", 2);
+        upgrade_unit('dio', 1);
+        upgrades_unit('dio', 2, 3);
     end);
     wave_function['10'] = (function()
-        upgrade_unit('erwin', 1);
-    end);
-    wave_function['11'] = (function()
-        spawn_unit('erwin', 2);
-        upgrades_unit('erwin', 2, 3);
+        spawn_unit('noro', 1);
+        upgrades_unit('noro', 1, 6);
     end);
     wave_function['12'] = (function()
-        upgrade_unit('erwin', 2);
+        spawn_unit('noro', 2);
+        upgrades_unit('noro', 2, 6);
     end);
     wave_function['13'] = (function()
-        upgrade_unit('erwin', 1);
-    end);
-    wave_function['14'] = (function()
-        upgrade_unit('erwin', 2);
+        spawn_unit('noro', 3);
+        upgrades_unit('noro', 3, 6);
     end);
     wave_function['15'] = (function()
+        spawn_unit('noro', 4);
+        upgrades_unit('noro', 4, 6);
+    end);
+    wave_function['16'] = (function()
+        upgrades_unit('dio', 2, 3);
+    end);
+    wave_function['18'] = (function()
+        spawn_unit('dio', 3);
+        upgrades_unit('dio', 3, 3)
+        spawn_unit('noro', 5);
+        upgrades_unit('noro', 5, 6);
+    end);
+    wave_function['20'] = (function()
         for k, v in pairs (unit_models) do
             sell_units(k, v);
         end;
@@ -346,7 +341,7 @@ end
 
 local join = coroutine.create(function()
     message('lobby activated');
-    wait(30);
+    wait(5);
     local lobby = join_lobby_random();
     wait(1);
     lock_level(lobby, getMaps(6, 'infinite'), 'Hard');
@@ -364,6 +359,7 @@ spawn(function()
     if not isLoaded() then
         waitLoaded();
     end
+    anti_afk();
     if placeId == place["lobby"] then
         coroutine.resume(join);
     elseif placeId == place["game"] then
@@ -371,7 +367,6 @@ spawn(function()
         _G.Timing = os.time();
         coroutine.resume(game);
     end
-    anti_afk();
 end)
 
 units.ChildAdded:Connect(function(unit)
