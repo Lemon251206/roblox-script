@@ -123,7 +123,7 @@ end;
 function join_lobby_random()
     local id = math.random(0, #lobbys);
     join_lobby(id);
-    if not isInLobby() then
+    if (getLobbyOwner() ~= nil) then
         return join_lobby_random();
     end;
     return lobbys[id];
@@ -179,6 +179,10 @@ end;
 
 function isInLobby()
     return getPlayer():WaitForChild('AlreadyInLobby').Value;
+end;
+
+function getLobbyOwner(id)
+    return tostring(workspace['_LOBBIES'].Story:FindFirstChild(lobbys[id]).Owner.Value);
 end;
 
 function getLocation(x, y, z)
@@ -381,7 +385,7 @@ spawn(function()
         _G.Timing = os.time();
         coroutine.resume(game);
     end
-end)
+end);
 
 units.ChildAdded:Connect(function(unit)
     local owner = tostring(unit:WaitForChild('_stats').player.Value);
@@ -405,6 +409,9 @@ getPlayer().OnTeleport:Connect(function(state)
             wait(5);
             loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
         ]])
+    elseif state == Enum.TeleportState.Failed then
+        wait(5);
+        TeleportService:Teleport(getPlaceId());
     end
 end);
 
