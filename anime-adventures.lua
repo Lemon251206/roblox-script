@@ -3,7 +3,9 @@
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
 local workspace = game:GetService("Workspace");
-local placeId = tonumber(game.PlaceId);
+
+local Players = game:GetService('Players');
+local TeleportService = game:GetService('TeleportService');
 
 --LocalWorkspace
 local units = workspace:WaitForChild("_UNITS");
@@ -38,11 +40,9 @@ local MapTypes = {
     ['story'] = '_level_';
 }
 
---LocalPlayer
-local player = game:GetService("Players").LocalPlayer;
-
 --GlobalField
 _G.WAVE = 0;
+_G.AutoRejoin = true;
 
 --LocalEvent
 local client_to_server = replicated.endpoints.client_to_server;
@@ -90,6 +90,14 @@ local unit_models = {
 
 local wave_function = {};
 
+function getPlayer()
+    return Players.LocalPlayer;
+end;
+
+function getPlaceId()
+    return game.PlaceId;
+end;
+
 function getMaps(id, types, level)
     if (types == 'infinite') then
         return tostring(Maps[id]..MapTypes[types]);
@@ -106,7 +114,7 @@ end;
 
 function join_lobby(id) -- id is Integer
     client_to_server.request_join_lobby:InvokeServer(lobbys[id]);
-    if (player:WaitForChild('AlreadyInLobby').Value) then
+    if (getPlayer():WaitForChild('AlreadyInLobby').Value) then
         message('join lobby [' .. lobbys[id] .. ']');
     end;
     return lobbys[id];
@@ -170,7 +178,7 @@ function upgrades_unit(unit_name, array, count)
 end;
 
 function isInLobby()
-    return player:WaitForChild('AlreadyInLobby').Value;
+    return getPlayer():WaitForChild('AlreadyInLobby').Value;
 end;
 
 function getLocation(x, y, z)
@@ -186,11 +194,11 @@ function getWaves()
 end;
 
 function getMoney()
-    return player._stats.resource.Value;
+    return getPlayer()._stats.resource.Value;
 end;
 
 function getGems() 
-    return player:WaitForChild("_stats").gem_amount.Value;
+    return getPlayer():WaitForChild("_stats").gem_amount.Value;
 end;
 
 function getGemsReceived()
@@ -224,7 +232,7 @@ function waitLoaded()
 end;
 
 function anti_afk()
-    for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+    for i,v in pairs(getconnections(getPlayer().Idled)) do
         v:Disable()
     end;
 end;
@@ -235,6 +243,10 @@ end;
 
 function message(message)
     print('['..time()..']: '..message)
+end;
+
+function onWaitCharacter()
+    repeat wait() until getPlayer():HasAppearanceLoaded();
 end;
 
 function getMessage(array)
@@ -251,7 +263,7 @@ function getEmbeds()
     	["embeds"] = {{
     		["title"] = "Anime Adventures [lemon]",
     		["description"] = getMessage({
-                '**Displayname:** ||'..player.Name..'||',
+                '**Displayname:** ||'..getPlayer().Name..'||',
                 '**Gems received:** '..getGemsReceived(),
                 '**Gems:** '..getGems(),
                 '**Waves:**'..getWaves(),
@@ -340,8 +352,9 @@ function load_function()
 end
 
 local join = coroutine.create(function()
-    message('lobby activated');
-    wait(30);
+    onWaitCharacter();
+    message('Lobby: Character is loaded.');
+    wait(1);
     local lobby = join_lobby_random();
     wait(1);
     lock_level(lobby, getMaps(1, 'infinite'), 'Hard');
@@ -350,7 +363,8 @@ local join = coroutine.create(function()
 end)
 
 local game = coroutine.create(function()
-    message('game activated');
+    onWaitCharacter();
+    message('Game: Character is loaded.');
     load_function();
     wait_wave();
 end)
@@ -360,9 +374,9 @@ spawn(function()
         waitLoaded();
     end
     anti_afk();
-    if placeId == place["lobby"] then
+    if getPlaceId() == place["lobby"] then
         coroutine.resume(join);
-    elseif placeId == place["game"] then
+    elseif getPlaceId() == place["game"] then
         _G.Gems = getGems();
         _G.Timing = os.time();
         coroutine.resume(game);
@@ -373,7 +387,7 @@ units.ChildAdded:Connect(function(unit)
     local owner = tostring(unit:WaitForChild('_stats').player.Value);
     local name = tostring(unit.Name);
     if (unit.Name ~= 'aot_generic') then
-        if (player.Name == owner) then
+        if (getPlayer().Name == owner) then
             if (unit_models[name] ~= nil) then
                 table.insert(unit_models[name], unit);
             else
@@ -384,7 +398,7 @@ units.ChildAdded:Connect(function(unit)
     end;
 end);
 
-player.OnTeleport:Connect(function(state)
+getPlayer().OnTeleport:Connect(function(state)
     if state == Enum.TeleportState.InProgress then
         syn.queue_on_teleport([[
         repeat wait() until game:IsLoaded()
@@ -392,4 +406,12 @@ player.OnTeleport:Connect(function(state)
             loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
         ]])
     end
-end)
+end);
+
+Players.PlayerRemoving:Connect(function(player)
+    if (_G.AutoRejoin) then
+        if (player == getPlayer()) then
+            TeleportService:Teleport(getPlaceId());
+        end;
+    end;
+end);
