@@ -122,10 +122,11 @@ end;
 
 function join_lobby_random()
     local id = math.random(0, #lobbys);
-    join_lobby(id); 
     if (getLobbyOwner(id) ~= 'nil') then
+        wait(0.5);
         return join_lobby_random();
     end;
+    join_lobby(id);
     return lobbys[id];
 end;
 
@@ -138,12 +139,12 @@ end;
 
 function lock_level(lobby_id, map_id, difficult) -- lobby_id, map_id, difficult is String
     client_to_server.request_lock_level:InvokeServer(lobby_id, map_id, true, difficult);
-    message('select map [' .. map_id .. ']');
+    message('select map [map:' .. map_id .. ', lobby: '.. lobby_id ..']');
 end;
 
 function start_game(lobby_id) -- lobby_id is String value
     client_to_server.request_start_game:InvokeServer(lobby_id);
-    message('start game');
+    message('start game [lobby: '.. lobby_id ..']' );
 end
 
 function back_to_lobby()
