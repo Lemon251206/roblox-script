@@ -123,7 +123,7 @@ end;
 function join_lobby_random()
     local id = math.random(0, #lobbys);
     join_lobby(id);
-    if (getLobbyOwner() ~= nil) then
+    if (getLobbyOwner(id) ~= nil) then
         return join_lobby_random();
     end;
     return lobbys[id];
