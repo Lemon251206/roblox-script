@@ -3,9 +3,7 @@
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
 local workspace = game:GetService("Workspace");
-
-local Players = game:GetService('Players');
-local TeleportService = game:GetService('TeleportService');
+local placeId = tonumber(game.PlaceId);
 
 --LocalWorkspace
 local units = workspace:WaitForChild("_UNITS");
@@ -40,9 +38,11 @@ local MapTypes = {
     ['story'] = '_level_';
 }
 
+--LocalPlayer
+local player = game:GetService("Players").LocalPlayer;
+
 --GlobalField
 _G.WAVE = 0;
-_G.AutoRejoin = true;
 
 --LocalEvent
 local client_to_server = replicated.endpoints.client_to_server;
@@ -66,21 +66,18 @@ local units_uuid = {
 local units_location = {
     ["speedwagon"] = {},
     ["dio"] = {
-        {-2958.14355, 91.8062057, -703.298401},
-        {-2955.81665, 91.8062057, -720.750732},
-        {-2943.29541, 91.8062057, -703.704773};
+        {-3000.06616, 58.5851364, -79.3267517},
+        {-3000.06616, 58.5851364, -77.3267517},
+        {-2998.06616, 58.5851364, -79.3267517};
     },
     ['jotaro'] = {},
     ["goku_black"] = {},
-    ["noro"] = {
-        {-2955.81665, 91.8062057, -718.750732},
-        {-2955.81665, 91.8062057, -722.750732},
-        {-2957.81665, 91.8062057, -719.750732},
-        {-2957.81665, 91.8062057, -721.750732},
-        {-2959.81665, 91.8062057, -720.750732};
-    },
+    ["noro"] = {},
     ['blackbeard'] = {},
-    ['erwin'] = {};
+    ['erwin'] = {
+        {-2997.41821, 58.5851364, -83.2992935},
+        {-2995.41821, 58.5851364, -83.2992935};
+    }
 }
 
 local unit_models = {
@@ -89,14 +86,6 @@ local unit_models = {
 };
 
 local wave_function = {};
-
-function getPlayer()
-    return Players.LocalPlayer;
-end;
-
-function getPlaceId()
-    return game.PlaceId;
-end;
 
 function getMaps(id, types, level)
     if (types == 'infinite') then
@@ -114,7 +103,7 @@ end;
 
 function join_lobby(id) -- id is Integer
     client_to_server.request_join_lobby:InvokeServer(lobbys[id]);
-    if (getPlayer():WaitForChild('AlreadyInLobby').Value) then
+    if (player:WaitForChild('AlreadyInLobby').Value) then
         message('join lobby [' .. lobbys[id] .. ']');
     end;
     return lobbys[id];
@@ -122,11 +111,10 @@ end;
 
 function join_lobby_random()
     local id = math.random(0, #lobbys);
-    if (getLobbyOwner(id) ~= 'nil') then
-        wait(0.5);
+    join_lobby(id);
+    if not isInLobby() then
         return join_lobby_random();
     end;
-    join_lobby(id);
     return lobbys[id];
 end;
 
@@ -139,12 +127,12 @@ end;
 
 function lock_level(lobby_id, map_id, difficult) -- lobby_id, map_id, difficult is String
     client_to_server.request_lock_level:InvokeServer(lobby_id, map_id, true, difficult);
-    message('select map [map:' .. map_id .. ', lobby: '.. lobby_id ..']');
+    message('select map [' .. map_id .. ']');
 end;
 
 function start_game(lobby_id) -- lobby_id is String value
     client_to_server.request_start_game:InvokeServer(lobby_id);
-    message('start game [lobby: '.. lobby_id ..']' );
+    message('start game');
 end
 
 function back_to_lobby()
@@ -179,11 +167,7 @@ function upgrades_unit(unit_name, array, count)
 end;
 
 function isInLobby()
-    return getPlayer():WaitForChild('AlreadyInLobby').Value;
-end;
-
-function getLobbyOwner(id)
-    return tostring(workspace['_LOBBIES'].Story:FindFirstChild(lobbys[id]).Owner.Value);
+    return player:WaitForChild('AlreadyInLobby').Value;
 end;
 
 function getLocation(x, y, z)
@@ -199,11 +183,11 @@ function getWaves()
 end;
 
 function getMoney()
-    return getPlayer()._stats.resource.Value;
+    return player._stats.resource.Value;
 end;
 
 function getGems() 
-    return getPlayer():WaitForChild("_stats").gem_amount.Value;
+    return player:WaitForChild("_stats").gem_amount.Value;
 end;
 
 function getGemsReceived()
@@ -237,7 +221,7 @@ function waitLoaded()
 end;
 
 function anti_afk()
-    for i,v in pairs(getconnections(getPlayer().Idled)) do
+    for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
         v:Disable()
     end;
 end;
@@ -248,10 +232,6 @@ end;
 
 function message(message)
     print('['..time()..']: '..message)
-end;
-
-function onWaitCharacter()
-    repeat wait() until getPlayer():HasAppearanceLoaded();
 end;
 
 function getMessage(array)
@@ -268,7 +248,7 @@ function getEmbeds()
     	["embeds"] = {{
     		["title"] = "Anime Adventures [lemon]",
     		["description"] = getMessage({
-                '**Displayname:** ||'..getPlayer().Name..'||',
+                '**Displayname:** ||'..player.Name..'||',
                 '**Gems received:** '..getGemsReceived(),
                 '**Gems:** '..getGems(),
                 '**Waves:**'..getWaves(),
@@ -311,45 +291,53 @@ end;
 
 function load_function() 
     wave_function['2'] = (function()
-        spawn_unit("dio", 1);
+        spawn_unit('dio', 1);
+        spawn_unit('dio', 2);
+        upgrades_unit('dio', 1, 2);
+    end);
+    wave_function['3'] = (function()
+        spawn_unit('dio', 3);
+        upgrade_unit('dio', 1);
+        upgrades_unit('dio', 2, 2);
     end);
     wave_function['4'] = (function()
-        upgrade_unit("dio", 1);
+        upgrade_unit('dio', 2);
+        upgrades_unit('dio', 3, 2);
+    end);
+    wave_function['5'] = (function()
+        upgrade_unit('dio', 1);
+        upgrade_unit('dio', 3);
     end);
     wave_function['6'] = (function()
-        upgrade_unit("dio", 1);
+        upgrade_unit('dio', 1);
+    end);
+    wave_function['7'] = (function()
+        upgrade_unit('dio', 1);
     end);
     wave_function['8'] = (function()
-        spawn_unit("dio", 2);
-        upgrade_unit('dio', 1);
-        upgrades_unit('dio', 2, 3);
+        spawn_unit('erwin', 1);
+        upgrades_unit('erwin', 1, 2);
+    end);
+    wave_function['9'] = (function()
+        upgrades_unit('erwin', 1, 2);
     end);
     wave_function['10'] = (function()
-        spawn_unit('noro', 1);
-        upgrades_unit('noro', 1, 6);
+        upgrade_unit('erwin', 1);
+    end);
+    wave_function['11'] = (function()
+        spawn_unit('erwin', 2);
+        upgrades_unit('erwin', 2, 3);
     end);
     wave_function['12'] = (function()
-        spawn_unit('noro', 2);
-        upgrades_unit('noro', 2, 6);
+        upgrade_unit('erwin', 2);
     end);
     wave_function['13'] = (function()
-        spawn_unit('noro', 3);
-        upgrades_unit('noro', 3, 6);
+        upgrade_unit('erwin', 1);
+    end);
+    wave_function['14'] = (function()
+        upgrade_unit('erwin', 2);
     end);
     wave_function['15'] = (function()
-        spawn_unit('noro', 4);
-        upgrades_unit('noro', 4, 6);
-    end);
-    wave_function['16'] = (function()
-        upgrades_unit('dio', 2, 3);
-    end);
-    wave_function['18'] = (function()
-        spawn_unit('dio', 3);
-        upgrades_unit('dio', 3, 3)
-        spawn_unit('noro', 5);
-        upgrades_unit('noro', 5, 6);
-    end);
-    wave_function['20'] = (function()
         for k, v in pairs (unit_models) do
             sell_units(k, v);
         end;
@@ -357,19 +345,17 @@ function load_function()
 end
 
 local join = coroutine.create(function()
-    onWaitCharacter();
-    message('Lobby: Character is loaded.');
-    wait(1);
+    message('lobby activated');
+    wait(30);
     local lobby = join_lobby_random();
     wait(1);
-    lock_level(lobby, getMaps(1, 'infinite'), 'Hard');
+    lock_level(lobby, getMaps(6, 'infinite'), 'Hard');
     wait(0.1);
     start_game(lobby);
 end)
 
 local game = coroutine.create(function()
-    onWaitCharacter();
-    message('Game: Character is loaded.');
+    message('game activated');
     load_function();
     wait_wave();
 end)
@@ -378,21 +364,21 @@ spawn(function()
     if not isLoaded() then
         waitLoaded();
     end
-    anti_afk();
-    if getPlaceId() == place["lobby"] then
+    if placeId == place["lobby"] then
         coroutine.resume(join);
-    elseif getPlaceId() == place["game"] then
+    elseif placeId == place["game"] then
         _G.Gems = getGems();
         _G.Timing = os.time();
         coroutine.resume(game);
     end
-end);
+    anti_afk();
+end)
 
 units.ChildAdded:Connect(function(unit)
     local owner = tostring(unit:WaitForChild('_stats').player.Value);
     local name = tostring(unit.Name);
     if (unit.Name ~= 'aot_generic') then
-        if (getPlayer().Name == owner) then
+        if (player.Name == owner) then
             if (unit_models[name] ~= nil) then
                 table.insert(unit_models[name], unit);
             else
@@ -403,23 +389,12 @@ units.ChildAdded:Connect(function(unit)
     end;
 end);
 
-getPlayer().OnTeleport:Connect(function(state)
+player.OnTeleport:Connect(function(state)
     if state == Enum.TeleportState.InProgress then
         syn.queue_on_teleport([[
         repeat wait() until game:IsLoaded()
             wait(5);
             loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
         ]])
-    elseif state == Enum.TeleportState.Failed then
-        wait(5);
-        TeleportService:Teleport(getPlaceId());
     end
-end);
-
-Players.PlayerRemoving:Connect(function(player)
-    if (_G.AutoRejoin) then
-        if (player == getPlayer()) then
-            TeleportService:Teleport(getPlaceId());
-        end;
-    end;
-end);
+end)
