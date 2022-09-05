@@ -1,4 +1,4 @@
---version: 0.3
+--version: 0.4
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -72,15 +72,12 @@ local units_location = {
     },
     ['jotaro'] = {},
     ["goku_black"] = {},
-    ["noro"] = {
-        {-2955.81665, 91.8062057, -718.750732},
-        {-2955.81665, 91.8062057, -722.750732},
-        {-2957.81665, 91.8062057, -719.750732},
-        {-2957.81665, 91.8062057, -721.750732},
-        {-2959.81665, 91.8062057, -720.750732};
-    },
     ['blackbeard'] = {},
-    ['erwin'] = {};
+    ['erwin'] = {
+        {-2953.46826, 95.7148895, -721.355835},
+        {-2953.46826, 95.7148895, -719.355835},
+        {-2953.46826, 95.7148895, -723.355835}
+    };
 }
 
 local unit_models = {
@@ -121,7 +118,7 @@ function join_lobby(id) -- id is Integer
 end;
 
 function join_lobby_random()
-    local id = math.random(0, #lobbys);
+    local id = math.random(1, #lobbys);
     if (getLobbyOwner(id) ~= 'nil') then
         wait(0.5);
         return join_lobby_random();
@@ -178,20 +175,15 @@ function upgrades_unit(unit_name, array, count)
     end
 end;
 
+function vote_start()
+    client_to_server.vote_start:InvokeServer();
+end;
+
 function isInLobby()
     return getPlayer():WaitForChild('AlreadyInLobby').Value;
 end;
 
 function getLobbyOwner(id)
-    print('ID: '.. id);
-    local lobbies = workspace['_LOBBIES'];
-    local story = lobbies['Story'];
-    local lobby = story:FindFirstChild(lobbys[id]);
-    local owner = lobby.Owner;
-    print('Lobbies: '.. lobbies.Name);
-    print('Story: '.. story.Name);
-    print('Lobby: '.. lobby.Name);
-    print('Onwer: '.. tostring(owner.Value));
     return tostring(workspace['_LOBBIES'].Story:FindFirstChild(lobbys[id]).Owner.Value);
 end;
 
@@ -216,7 +208,7 @@ function getGems()
 end;
 
 function getGemsReceived()
-    return (tonumber(getGems()) - tonumber(_G.Gems));
+    return getPlayer():WaitForChild('_stats').infinite_claimed_gems.Value;
 end;
 
 function Format(Int)
@@ -306,10 +298,9 @@ end;
 function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
-            wait(10);
-            webhook('https://discord.com/api/webhooks/994515134380781668/dH6PDbmHltUeVnKJUVxoRJ2S2n0imhSMhO0ON1RGKtNrzycqdcRzo2OeeLKHuPRaoD79');
-            wait(2.5);
-            back_to_lobby();
+            wait(1);
+            webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
+            teleport('lobby');
             break;
         end
         if getWaves() == (_G.WAVE + 1) then
@@ -323,50 +314,42 @@ function wait_wave()
 end;
 
 function load_function() 
-    wave_function['2'] = (function()
-        spawn_unit("dio", 1);
-    end);
-    wave_function['4'] = (function()
-        upgrade_unit("dio", 1);
-    end);
-    wave_function['6'] = (function()
-        upgrade_unit("dio", 1);
-    end);
-    wave_function['8'] = (function()
-        spawn_unit("dio", 2);
-        upgrade_unit('dio', 1);
-        upgrades_unit('dio', 2, 3);
-    end);
-    wave_function['10'] = (function()
-        spawn_unit('noro', 1);
-        upgrades_unit('noro', 1, 6);
-    end);
-    wave_function['12'] = (function()
-        spawn_unit('noro', 2);
-        upgrades_unit('noro', 2, 6);
-    end);
-    wave_function['13'] = (function()
-        spawn_unit('noro', 3);
-        upgrades_unit('noro', 3, 6);
-    end);
-    wave_function['15'] = (function()
-        spawn_unit('noro', 4);
-        upgrades_unit('noro', 4, 6);
-    end);
-    wave_function['16'] = (function()
-        upgrades_unit('dio', 2, 3);
-    end);
-    wave_function['18'] = (function()
-        spawn_unit('dio', 3);
-        upgrades_unit('dio', 3, 3)
-        spawn_unit('noro', 5);
-        upgrades_unit('noro', 5, 6);
-    end);
-    wave_function['20'] = (function()
-        for k, v in pairs (unit_models) do
-            sell_units(k, v);
+    wait_function['0'] = function()
+        while((getWaves() == 0)) do
+            vote_start();
+            wait(0.5);
         end;
-    end);
+    end;
+    wave_function['2'] = function()
+        spawn_unit('erwin', 1);
+        spawn_unit('erwin', 2);
+        spawn_unit('erwin', 3);
+    end;
+    wave_function['5'] = function()
+        upgrade_unit('erwin', 1);
+        upgrade_unit('erwin', 2);
+        upgrade_unit('erwin', 3);
+    end;
+    wave_function['8'] = function()
+        upgrades_unit('erwin', 1, 2);
+        upgrades_unit('erwin', 2, 2);
+        upgrades_unit('erwin', 3, 2);
+    end;
+    wave_function['15'] = function()
+        upgrade_unit('erwin', 1);
+        upgrade_unit('erwin', 2);
+        upgrade_unit('erwin', 3);
+    end;
+    wave_function['18'] = function()
+        upgrade_unit('erwin', 1);
+        upgrade_unit('erwin', 2);
+        upgrade_unit('erwin', 3);
+    end;
+    wave_function['21'] = function()
+        wait(1);
+        webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
+        teleport('lobby');
+    end;
 end
 
 local join = coroutine.create(function()
@@ -395,7 +378,6 @@ spawn(function()
     if getPlaceId() == places["lobby"] then
         coroutine.resume(join);
     elseif getPlaceId() == places["game"] then
-        _G.Gems = getGems();
         _G.Timing = os.time();
         coroutine.resume(game);
     end
