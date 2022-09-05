@@ -357,7 +357,7 @@ local join = coroutine.create(function()
     message('Lobby: Character is loaded.');
     wait(1);
     local lobby = join_lobby_random();
-    wait(1);
+    wait(0.5);
     lock_level(lobby, getMaps(1, 'infinite'), 'Hard');
     wait(0.1);
     start_game(lobby);
