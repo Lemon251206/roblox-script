@@ -1,4 +1,4 @@
---version: 0.2
+--version: 0.3
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -47,7 +47,7 @@ _G.AutoRejoin = true;
 --LocalEvent
 local client_to_server = replicated.endpoints.client_to_server;
 
-local place = {
+local places = {
     ["lobby"] = 8304191830,
     ["game"] = 8349889591;
 }
@@ -183,6 +183,15 @@ function isInLobby()
 end;
 
 function getLobbyOwner(id)
+    print('ID: '.. id);
+    local lobbies = workspace['_LOBBIES'];
+    local story = lobbies['Story'];
+    local lobby = story:FindFirstChild(lobbys[id]);
+    local owner = lobby.Owner;
+    print('Lobbies: '.. lobbies.Name);
+    print('Story: '.. story.Name);
+    print('Lobby: '.. lobby.Name);
+    print('Onwer: '.. tostring(owner.Value));
     return tostring(workspace['_LOBBIES'].Story:FindFirstChild(lobbys[id]).Owner.Value);
 end;
 
@@ -280,6 +289,10 @@ function getEmbeds()
     }
     return embeded;
 end
+
+function teleport(id)
+    TeleportService:Teleport(places[id], player);
+end;
 
 function webhook(url)
 	syn.request({
@@ -379,9 +392,9 @@ spawn(function()
         waitLoaded();
     end
     anti_afk();
-    if getPlaceId() == place["lobby"] then
+    if getPlaceId() == places["lobby"] then
         coroutine.resume(join);
-    elseif getPlaceId() == place["game"] then
+    elseif getPlaceId() == places["game"] then
         _G.Gems = getGems();
         _G.Timing = os.time();
         coroutine.resume(game);
@@ -408,11 +421,14 @@ getPlayer().OnTeleport:Connect(function(state)
         syn.queue_on_teleport([[
         repeat wait() until game:IsLoaded()
             wait(5);
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
+            if not (_G.execute) then
+                loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
+                _G.execute = true;
+            end;
         ]])
     elseif state == Enum.TeleportState.Failed then
         wait(5);
-        TeleportService:Teleport(getPlaceId());
+        TeleportService:Teleport(getPlaceId(), player);
     end
 end);
 
