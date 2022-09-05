@@ -303,6 +303,9 @@ function wait_wave()
             teleport('lobby');
             break;
         end
+	if (getWaves() == 0) then
+	    vote_start();		
+	end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
