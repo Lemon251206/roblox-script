@@ -1,4 +1,4 @@
---version: 0.4
+--version: 0.5
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -41,7 +41,7 @@ local MapTypes = {
 }
 
 --GlobalField
-_G.WAVE = 0;
+_G.WAVE = -1;
 _G.AutoRejoin = true;
 
 --LocalEvent
@@ -314,7 +314,7 @@ function wait_wave()
 end;
 
 function load_function() 
-    wait_function['0'] = function()
+    wave_function['0'] = function()
         while((getWaves() == 0)) do
             vote_start();
             wait(0.5);
