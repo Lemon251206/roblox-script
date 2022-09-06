@@ -3,6 +3,7 @@
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
 local workspace = game:GetService("Workspace");
+local NetworkClient = game:GetService('NetworkClient');
 
 local Players = game:GetService('Players');
 local TeleportService = game:GetService('TeleportService');
@@ -51,6 +52,11 @@ local places = {
     ["lobby"] = 8304191830,
     ["game"] = 8349889591;
 }
+
+local jobId = {
+    ['lobby'] = '94a95497-3924-24f2-b678-593745363268',
+    ['game'] = '';
+};
 
 local units_uuid = {
     ["speedwagon"] = "{11e83561-3a82-453b-a6e5-5390e472f0ed}",
@@ -299,13 +305,10 @@ function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
             wait(1);
-            webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
+            webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
             teleport('lobby');
             break;
         end
-	if (getWaves() == 0) then
-	    vote_start();		
-	end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
@@ -344,7 +347,7 @@ function load_function()
     end;
     wave_function['21'] = function()
         wait(1);
-        webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
+        webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
         teleport('lobby');
     end;
 end
@@ -407,14 +410,10 @@ getPlayer().OnTeleport:Connect(function(state)
         ]])
     elseif state == Enum.TeleportState.Failed then
         wait(5);
-        TeleportService:Teleport(getPlaceId(), player);
+        TeleportService:Teleport(places['lobby'], player);
     end
 end);
 
-Players.PlayerRemoving:Connect(function(player)
-    if (_G.AutoRejoin) then
-        if (player == getPlayer()) then
-            TeleportService:Teleport(getPlaceId());
-        end;
-    end;
+NetworkClient.ChildRemoved:Connect(function()
+    TeleportService:Teleport(places['lobby'], player);
 end);
