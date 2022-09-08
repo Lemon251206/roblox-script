@@ -33,7 +33,9 @@ local Maps = {
     'demonslayer',
     'naruto',
     'marineford',
-    'tokyoghoul';
+    'tokyoghoul',
+    'hueco',
+    'hxhant';
 }
 
 local MapTypes = {
@@ -41,9 +43,12 @@ local MapTypes = {
     ['story'] = '_level_';
 }
 
+local erwins = {};
+
 --GlobalField
 _G.WAVE = 0;
 _G.AutoRejoin = true;
+_G.AutoErwin = true;
 
 --LocalEvent
 local client_to_server = replicated.endpoints.client_to_server;
@@ -257,6 +262,31 @@ function message(message)
     print('['..time()..']: '..message)
 end;
 
+function auto_erwin()
+    if (#erwins >= 2) then
+        if (erwins[1]['model']:FindFirstChild('_stats').upgrade.Value >= 3) and (erwins[2]['model']:FindFirstChild('_stats').upgrade.Value >= 3) then
+            if ((erwins[1]['cooldown']+100) < os.time()) and ((erwins[1]['cooldown']+100) < os.time()) then
+                use_active_attack(erwins[1]['model']);
+                erwins[1]['cooldown'] = (os.time() + 42);
+                erwins[2]['cooldown'] = (os.time() + 21);
+                print('auto-erwin_start');
+                return;
+            end;
+            if (erwins[1]['cooldown'] <= os.time()) then
+                use_active_attack(erwins[1]['model']);
+                erwins[1]['cooldown'] = (os.time() + 42);
+                erwins[2]['cooldown'] = (os.time() + 21);
+                print('auto-erwin_1');
+            elseif (erwins[2]['cooldown'] <= os.time()) then
+                use_active_attack(erwins[2]['model']);
+                erwins[2]['cooldown'] = (os.time() + 42);
+                erwins[1]['cooldown'] = (os.time() + 21);
+                print('auto-erwin_2');
+            end;
+        end;
+    end;
+end;
+
 function onWaitCharacter()
     repeat wait() until getPlayer():HasAppearanceLoaded();
 end;
@@ -292,6 +322,10 @@ function teleport(id)
     TeleportService:Teleport(places[id], player);
 end;
 
+function rejoin()
+    player:Kick('LemonProject: rejoin');
+end;
+
 function webhook(url)
 	syn.request({
 		Url = url,
@@ -304,11 +338,14 @@ end;
 function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
-            wait(1);
+            wait(2);
             webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
-            teleport('lobby');
+            back_to_lobby();
             break;
         end
+        if (_G.AutoErwin) then
+            auto_erwin();
+        end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
@@ -335,20 +372,15 @@ function load_function()
         upgrades_unit('erwin', 2, 2);
         upgrades_unit('erwin', 3, 2);
     end;
+    wave_function['12'] = function()
+        upgrade_unit('erwin', 1);
+        upgrade_unit('erwin', 2);
+        upgrade_unit('erwin', 3);
+    end;
     wave_function['15'] = function()
         upgrade_unit('erwin', 1);
         upgrade_unit('erwin', 2);
         upgrade_unit('erwin', 3);
-    end;
-    wave_function['18'] = function()
-        upgrade_unit('erwin', 1);
-        upgrade_unit('erwin', 2);
-        upgrade_unit('erwin', 3);
-    end;
-    wave_function['21'] = function()
-        wait(1);
-        webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
-        teleport('lobby');
     end;
 end
 
@@ -358,7 +390,7 @@ local join = coroutine.create(function()
     wait(1);
     local lobby = join_lobby_random();
     wait(0.5);
-    lock_level(lobby, getMaps(1, 'infinite'), 'Hard');
+    lock_level(lobby, getMaps(7, 'infinite'), 'Hard');
     wait(0.1);
     start_game(lobby);
 end)
@@ -386,6 +418,12 @@ end);
 units.ChildAdded:Connect(function(unit)
     local owner = tostring(unit:WaitForChild('_stats').player.Value);
     local name = tostring(unit.Name);
+    if (name == 'erwin') then
+        if (owner == getPlayer()) then
+            table.insert(erwins, {['model'] = unit, ['cooldown'] = -1});
+            print('added erwin');
+        end;
+    end;
     if (unit.Name ~= 'aot_generic') then
         if (getPlayer().Name == owner) then
             if (unit_models[name] ~= nil) then
@@ -394,6 +432,19 @@ units.ChildAdded:Connect(function(unit)
                 unit_models[name] = {};
                 table.insert(unit_models[name], unit);
             end;
+        end;
+    end;
+end);
+
+units.ChildRemoved:Connect(function(unit)
+    local owner = unit:WaitForChild('_stats').player.Value;
+    local name = tostring(unit.Name);
+    if (name == 'erwin') then
+        for i = 1, #erwins do
+            if (erwins[i]['model'] == unit) then
+                erwins[i] = nil;
+                print('removed erwin');
+            end
         end;
     end;
 end);
