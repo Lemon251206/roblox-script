@@ -1,4 +1,4 @@
---version: 0.7
+--version: 0.6
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -370,15 +370,20 @@ function load_function()
         upgrades_unit('erwin', 2, 2);
         upgrades_unit('erwin', 3, 2);
     end;
-    wave_function['12'] = function()
-        upgrades_unit('erwin', 1, 2);
-        upgrades_unit('erwin', 2, 2);
-        upgrades_unit('erwin', 3, 2);
-    end;
     wave_function['15'] = function()
         upgrade_unit('erwin', 1);
         upgrade_unit('erwin', 2);
         upgrade_unit('erwin', 3);
+    end;
+    wave_function['18'] = function()
+        upgrade_unit('erwin', 1);
+        upgrade_unit('erwin', 2);
+        upgrade_unit('erwin', 3);
+    end;
+    wave_function['21'] = function()
+        wait(1);
+        webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
+        teleport('lobby');
     end;
 end
 
@@ -414,10 +419,11 @@ spawn(function()
 end);
 
 units.ChildAdded:Connect(function(unit)
-    if not (unit['_stats']) and not (unit['_stats'].player) then
+    local _stats = unit:WaitForChild('_stats');
+    if (tostring(_stats.base.Value) ~= 'player') then
         return;
     end;
-    local owner = unit:WaitForChild('_stats').player.Value;
+    local owner = _stats.player.Value;
     local name = unit.Name;
     if (name == 'erwin') then
         if (owner == getPlayer()) then
@@ -438,11 +444,12 @@ units.ChildAdded:Connect(function(unit)
 end);
 
 units.ChildRemoved:Connect(function(unit)
-    if not (unit['_stats']) and not (unit['_stats'].player) then
+    local _stats = unit:WaitForChild('_stats');
+    if (tostring(_stats.base.Value) ~= 'player') then
         return;
     end;
-    local owner = unit:WaitForChild('_stats').player.Value;
-    local name = unit.Name;
+    local owner = _stats.player.Value;
+    local name = unit.Name);
     if (name == 'erwin') then
         for i = 1, #erwins do
             if (erwins[i]['model'] == unit) then
