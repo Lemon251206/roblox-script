@@ -1,4 +1,4 @@
---version: 0.7
+--version: 0.8
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -341,9 +341,6 @@ function wait_wave()
             teleport('lobby');
             break;
         end
-        if (_G.AutoErwin) then
-            auto_erwin();
-        end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
@@ -420,7 +417,7 @@ end);
 
 units.ChildAdded:Connect(function(unit)
     local _stats = unit:WaitForChild('_stats');
-    if (tostring(_stats.base.Value) ~= 'player') then
+    if (_stats.base) and (tostring(_stats.base.Value) ~= 'player') then
         return;
     end;
     local owner = _stats.player.Value;
