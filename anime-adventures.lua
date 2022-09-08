@@ -346,6 +346,9 @@ function wait_wave()
         if (_G.AutoErwin) then
             auto_erwin();
         end;
+        if (getWaves() == 0) then
+            vote_start();
+        end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
