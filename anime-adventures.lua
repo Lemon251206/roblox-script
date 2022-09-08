@@ -376,9 +376,9 @@ function load_function()
         upgrades_unit('erwin', 3, 2);
     end;
     wave_function['12'] = function()
-        upgrade_unit('erwin', 1);
-        upgrade_unit('erwin', 2);
-        upgrade_unit('erwin', 3);
+        upgrades_unit('erwin', 1, 2);
+        upgrades_unit('erwin', 2, 2);
+        upgrades_unit('erwin', 3, 2);
     end;
     wave_function['15'] = function()
         upgrade_unit('erwin', 1);
