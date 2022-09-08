@@ -1,4 +1,4 @@
---version: 0.6
+--version: 0.7
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -449,7 +449,7 @@ units.ChildRemoved:Connect(function(unit)
         return;
     end;
     local owner = _stats.player.Value;
-    local name = unit.Name);
+    local name = unit.Name;
     if (name == 'erwin') then
         for i = 1, #erwins do
             if (erwins[i]['model'] == unit) then
