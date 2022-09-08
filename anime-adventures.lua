@@ -1,4 +1,4 @@
---version: 0.6
+--version: 0.7
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -33,9 +33,7 @@ local Maps = {
     'demonslayer',
     'naruto',
     'marineford',
-    'tokyoghoul',
-    'hueco',
-    'hxhant';
+    'tokyoghoul';
 }
 
 local MapTypes = {
@@ -338,16 +336,13 @@ end;
 function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
-            wait(2);
-            webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
-            back_to_lobby();
+            wait(1);
+            webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
+            teleport('lobby');
             break;
         end
         if (_G.AutoErwin) then
             auto_erwin();
-        end;
-        if (getWaves() == 0) then
-            vote_start();
         end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
@@ -393,7 +388,7 @@ local join = coroutine.create(function()
     wait(1);
     local lobby = join_lobby_random();
     wait(0.5);
-    lock_level(lobby, getMaps(7, 'infinite'), 'Hard');
+    lock_level(lobby, getMaps(1, 'infinite'), 'Hard');
     wait(0.1);
     start_game(lobby);
 end)
@@ -419,16 +414,19 @@ spawn(function()
 end);
 
 units.ChildAdded:Connect(function(unit)
-    local owner = tostring(unit:WaitForChild('_stats').player.Value);
-    local name = tostring(unit.Name);
+    if not (unit['_stats']) and not (unit['_stats'].player) then
+        return;
+    end;
+    local owner = unit:WaitForChild('_stats').player.Value;
+    local name = unit.Name;
     if (name == 'erwin') then
         if (owner == getPlayer()) then
             table.insert(erwins, {['model'] = unit, ['cooldown'] = -1});
             print('added erwin');
         end;
     end;
-    if (unit.Name ~= 'aot_generic') then
-        if (getPlayer().Name == owner) then
+    if (name ~= 'aot_generic') then
+        if (getPlayer() == owner) then
             if (unit_models[name] ~= nil) then
                 table.insert(unit_models[name], unit);
             else
@@ -440,8 +438,11 @@ units.ChildAdded:Connect(function(unit)
 end);
 
 units.ChildRemoved:Connect(function(unit)
+    if not (unit['_stats']) and not (unit['_stats'].player) then
+        return;
+    end;
     local owner = unit:WaitForChild('_stats').player.Value;
-    local name = tostring(unit.Name);
+    local name = unit.Name;
     if (name == 'erwin') then
         for i = 1, #erwins do
             if (erwins[i]['model'] == unit) then
