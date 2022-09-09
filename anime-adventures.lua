@@ -1,9 +1,10 @@
---version: 0.9
+--version: 0.6
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
 local workspace = game:GetService("Workspace");
 local NetworkClient = game:GetService('NetworkClient');
+local VirtualUser = game:GetService('VirtualUser');
 
 local Players = game:GetService('Players');
 local TeleportService = game:GetService('TeleportService');
@@ -47,6 +48,8 @@ local erwins = {};
 _G.WAVE = 0;
 _G.AutoRejoin = true;
 _G.AutoErwin = true;
+_G.Anti_AFK = true;
+_G.execute = false;
 
 --LocalEvent
 local client_to_server = replicated.endpoints.client_to_server;
@@ -221,13 +224,13 @@ function getGemsReceived()
 end;
 
 function Format(Int)
-	return string.format("%02i", Int)
+    return string.format("%02i", Int)
 end;
 
 function convertToHMS(seconds)
-	local Minutes = (seconds - seconds%60)/60
-	seconds = seconds - Minutes*60
-	return Format(Minutes)..":"..Format(seconds)
+    local Minutes = (seconds - seconds%60)/60
+    seconds = seconds - Minutes*60
+    return Format(Minutes)..":"..Format(seconds)
 end;
 
 function getTotalTime()
@@ -244,12 +247,6 @@ end;
 
 function waitLoaded()
     return game.Loaded:Wait();
-end;
-
-function anti_afk()
-    for i,v in pairs(getconnections(getPlayer().Idled)) do
-        v:Disable()
-    end;
 end;
 
 function time()
@@ -299,10 +296,10 @@ end;
 
 function getEmbeds()
     embeded = {
-    	--["content"] = "@everyone", -- pings user on discord
-    	["embeds"] = {{
-    		["title"] = "Anime Adventures [lemon]",
-    		["description"] = getMessage({
+        --["content"] = "@everyone", -- pings user on discord
+        ["embeds"] = {{
+            ["title"] = "Anime Adventures [lemon]",
+            ["description"] = getMessage({
                 '**Displayname:** ||'..getPlayer().Name..'||',
                 '**Gems received:** '..getGemsReceived(),
                 '**Gems:** '..getGems(),
@@ -310,8 +307,8 @@ function getEmbeds()
                 '',
                 '**Total time:**'..getTotalTime();
             });
-    		["color"] = 14400313;
-    	}}
+            ["color"] = 14400313;
+        }}
     }
     return embeded;
 end
@@ -325,12 +322,12 @@ function rejoin()
 end;
 
 function webhook(url)
-	syn.request({
-		Url = url,
-		Method = "POST",
-		Headers = { ["Content-Type"] =  "application/json" },
-		Body = game:GetService('HttpService'):JSONEncode(getEmbeds());
-	})
+    syn.request({
+        Url = url,
+        Method = "POST",
+        Headers = { ["Content-Type"] =  "application/json" },
+        Body = game:GetService('HttpService'):JSONEncode(getEmbeds());
+    })
 end;
 
 function wait_wave()
@@ -341,9 +338,6 @@ function wait_wave()
             teleport('lobby');
             break;
         end
-        if (_G.AutoErwin) then
-            auto_erwin();
-        end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
@@ -401,15 +395,15 @@ end)
 local game = coroutine.create(function()
     onWaitCharacter();
     message('Game: Character is loaded.');
-    load_function();
+    --load_function();
     wait_wave();
+    print(_G.execute);
 end)
 
 spawn(function()
     if not isLoaded() then
         waitLoaded();
     end
-    anti_afk();
     if getPlaceId() == places["lobby"] then
         coroutine.resume(join);
     elseif getPlaceId() == places["game"] then
@@ -421,15 +415,14 @@ end);
 units.ChildAdded:Connect(function(unit)
     local _stats = unit:WaitForChild('_stats');
     local _base = _stats:WaitForChild('base');
-    if (base) (tostring(base.Value) ~= 'player') then
+    if not (_base) or (tostring(_base.Value) ~= 'player') then
         return;
     end;
     local owner = _stats.player.Value;
     local name = unit.Name;
     if (name == 'erwin') then
         if (owner == getPlayer()) then
-            table.insert(erwins, {['model'] = unit, ['cooldown'] = -1});
-            print(erwins);
+            erwins[#erwins+1] = {['model'] = unit, ['cooldown'] = -1}
         end;
     end;
     if (name ~= 'aot_generic') then
@@ -446,7 +439,8 @@ end);
 
 units.ChildRemoved:Connect(function(unit)
     local _stats = unit:WaitForChild('_stats');
-    if (tostring(_stats.base.Value) ~= 'player') then
+    local _base = _stats:WaitForChild('base');
+    if not (_base) or (tostring(_base.Value) ~= 'player') then
         return;
     end;
     local owner = _stats.player.Value;
@@ -462,21 +456,32 @@ units.ChildRemoved:Connect(function(unit)
 end);
 
 getPlayer().OnTeleport:Connect(function(state)
-    if state == Enum.TeleportState.InProgress then
-        syn.queue_on_teleport([[
-        repeat wait() until game:IsLoaded()
+    if (_G.Script) then
+        if state == Enum.TeleportState.InProgress then
+            syn.queue_on_teleport([[
+            repeat wait() until game:IsLoaded()
+                wait(5);
+                if not (_G.execute) then
+                    loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
+                    _G.execute = true;
+                    print(_G.execute);
+                end;
+            ]])
+        elseif state == Enum.TeleportState.Failed then
             wait(5);
-            if not (_G.execute) then
-                loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
-                _G.execute = true;
-            end;
-        ]])
-    elseif state == Enum.TeleportState.Failed then
-        wait(5);
-        TeleportService:Teleport(places['lobby'], player);
-    end
+            TeleportService:Teleport(places['lobby'], player);
+        end
+    end;
 end);
 
 NetworkClient.ChildRemoved:Connect(function()
     TeleportService:Teleport(places['lobby'], player);
+end);
+
+getPlayer().Idled:connect(function()
+    if (_G.Anti_AFK) then
+        VirtualUser:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+        wait(1)
+        VirtualUser:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end;
 end);
