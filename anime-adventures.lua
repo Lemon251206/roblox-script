@@ -1,4 +1,4 @@
---version: 0.8
+--version: 0.9
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -341,6 +341,9 @@ function wait_wave()
             teleport('lobby');
             break;
         end
+        if (_G.AutoErwin) then
+            auto_erwin();
+        end;
         if getWaves() == (_G.WAVE + 1) then
             local wave_action = wave_function[tostring(getWaves())];
             if (wave_action ~= nil) then
@@ -417,7 +420,8 @@ end);
 
 units.ChildAdded:Connect(function(unit)
     local _stats = unit:WaitForChild('_stats');
-    if (_stats.base) and (tostring(_stats.base.Value) ~= 'player') then
+    local _base = _stats:WaitForChild('base');
+    if (base) (tostring(base.Value) ~= 'player') then
         return;
     end;
     local owner = _stats.player.Value;
@@ -425,7 +429,7 @@ units.ChildAdded:Connect(function(unit)
     if (name == 'erwin') then
         if (owner == getPlayer()) then
             table.insert(erwins, {['model'] = unit, ['cooldown'] = -1});
-            print('added erwin');
+            print(erwins);
         end;
     end;
     if (name ~= 'aot_generic') then
