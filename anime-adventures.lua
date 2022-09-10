@@ -1,4 +1,4 @@
---version: 0.6
+--version: 0.10
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -452,7 +452,7 @@ NetworkClient.ChildRemoved:Connect(function()
 end);
 
 function anti_afk()
-    for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+    for i,v in pairs(getconnections(getPlayer().Idled)) do
         v:Disable()
     end;
 end;
