@@ -404,6 +404,7 @@ spawn(function()
     if not isLoaded() then
         waitLoaded();
     end
+    anti_afk();
     if getPlaceId() == places["lobby"] then
         coroutine.resume(join);
     elseif getPlaceId() == places["game"] then
@@ -413,44 +414,16 @@ spawn(function()
 end);
 
 units.ChildAdded:Connect(function(unit)
-    local _stats = unit:WaitForChild('_stats');
-    local _base = _stats:WaitForChild('base');
-    if not (_base) or (tostring(_base.Value) ~= 'player') then
-        return;
-    end;
-    local owner = _stats.player.Value;
-    local name = unit.Name;
-    if (name == 'erwin') then
-        if (owner == getPlayer()) then
-            erwins[#erwins+1] = {['model'] = unit, ['cooldown'] = -1}
-        end;
-    end;
-    if (name ~= 'aot_generic') then
-        if (getPlayer() == owner) then
+    local owner = tostring(unit:WaitForChild('_stats').player.Value);
+    local name = tostring(unit.Name);
+    if (unit.Name ~= 'aot_generic') then
+        if (player.Name == owner) then
             if (unit_models[name] ~= nil) then
                 table.insert(unit_models[name], unit);
             else
                 unit_models[name] = {};
                 table.insert(unit_models[name], unit);
             end;
-        end;
-    end;
-end);
-
-units.ChildRemoved:Connect(function(unit)
-    local _stats = unit:WaitForChild('_stats');
-    local _base = _stats:WaitForChild('base');
-    if not (_base) or (tostring(_base.Value) ~= 'player') then
-        return;
-    end;
-    local owner = _stats.player.Value;
-    local name = unit.Name;
-    if (name == 'erwin') then
-        for i = 1, #erwins do
-            if (erwins[i]['model'] == unit) then
-                erwins[i] = nil;
-                print('removed erwin');
-            end
         end;
     end;
 end);
@@ -477,6 +450,12 @@ end);
 NetworkClient.ChildRemoved:Connect(function()
     TeleportService:Teleport(places['lobby'], player);
 end);
+
+function anti_afk()
+    for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+        v:Disable()
+    end;
+end;
 
 getPlayer().Idled:connect(function()
     if (_G.Anti_AFK) then
