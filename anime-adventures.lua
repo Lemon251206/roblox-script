@@ -1,4 +1,4 @@
---version: 0.10
+--version: 0.11
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -334,7 +334,7 @@ function wait_wave()
     while(wait(0.1)) do
         if isFinished() then
             wait(1);
-            webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
+            webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
             teleport('lobby');
             break;
         end
@@ -376,7 +376,7 @@ function load_function()
     end;
     wave_function['21'] = function()
         wait(1);
-        webhook('https://discord.com/api/webhooks/1012690282086670397/48EVzjpBB0fR4AbIGk9t0Ivz587GTgZAoOJI9hS5pfHvinyB9BGbGVNhq0xKiH47nA_K');
+        webhook('https://discord.com/api/webhooks/1016379765848019054/vBl-YeRN7iGg6PeH64J5UWciVtL2fVi3YGYAqzIlPB0pKZT6MvFlEmmwEFecz0_34uBv');
         teleport('lobby');
     end;
 end
