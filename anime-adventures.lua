@@ -1,4 +1,4 @@
---version: 0.11
+--version: 0.12
 
 --LocalServer
 local replicated = game:GetService("ReplicatedStorage");
@@ -395,7 +395,7 @@ end)
 local game = coroutine.create(function()
     onWaitCharacter();
     message('Game: Character is loaded.');
-    --load_function();
+    load_function();
     wait_wave();
     print(_G.execute);
 end)
