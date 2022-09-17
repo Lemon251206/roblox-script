@@ -434,10 +434,7 @@ getPlayer().OnTeleport:Connect(function(state)
             syn.queue_on_teleport([[
             repeat wait() until game:IsLoaded()
                 wait(5);
-                if not (_G.execute) then
-                    loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
-                    _G.execute = true;
-                    print(_G.execute);
+                loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
                 end;
             ]])
         elseif state == Enum.TeleportState.Failed then
