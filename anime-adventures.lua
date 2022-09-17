@@ -417,7 +417,7 @@ units.ChildAdded:Connect(function(unit)
     local owner = tostring(unit:WaitForChild('_stats').player.Value);
     local name = tostring(unit.Name);
     if (unit.Name ~= 'aot_generic') then
-        if (player.Name == owner) then
+        if (getPlayer().Name == owner) then
             if (unit_models[name] ~= nil) then
                 table.insert(unit_models[name], unit);
             else
@@ -429,18 +429,16 @@ units.ChildAdded:Connect(function(unit)
 end);
 
 getPlayer().OnTeleport:Connect(function(state)
-    if (_G.Script) then
-        if state == Enum.TeleportState.InProgress then
-            syn.queue_on_teleport([[
-            repeat wait() until game:IsLoaded()
-                wait(5);
-                loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
-                end;
-            ]])
-        elseif state == Enum.TeleportState.Failed then
+    if state == Enum.TeleportState.InProgress then
+        syn.queue_on_teleport([[
+        repeat wait() until game:IsLoaded()
             wait(5);
-            TeleportService:Teleport(places['lobby'], player);
-        end
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/Lemon251206/roblox-script/main/anime-adventures.lua'))();
+            end;
+        ]])
+    elseif state == Enum.TeleportState.Failed then
+        wait(5);
+        TeleportService:Teleport(places['lobby'], player);
     end;
 end);
 
